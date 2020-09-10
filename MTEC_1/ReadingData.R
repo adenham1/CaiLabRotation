@@ -1,0 +1,20 @@
+library(Seurat)
+source("https://raw.githubusercontent.com/dosorio/utilities/master/singleCell/scQC.R")
+Read10X(".")
+Data <- Read10X(".")
+Data = scQC(Data, mtThreshold = 0.05)
+CreateSeuratObject(Data)
+Data = CreateSeuratObject(Data)
+NormalizeData(Data)
+Data = NormalizeData(Data)
+#
+Data = FindVariableFeatures(Data)
+Data = ScaleData(Data)
+Data = RunPCA(Data)
+Data = RunTSNE(Data)
+TSNEPlot(Data)
+FeaturePlot(Data, c("Foxp3","Ikzf2", "Cd4"))
+VG = VariableFeatures(Data)
+FeaturePlot(Data, VG[1:10], order = TRUE)
+
+
