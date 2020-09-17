@@ -30,23 +30,15 @@ DimPlot(cMatrix, reduction = "umap")
 
 c2=subset(cMatrix,ident=0)
 cMatrix=c2@assays$RNA@counts
+source("https://raw.githubusercontent.com/dosorio/utilities/master/singleCell/getPseudotime.R")
+PT= computePseudoTime(cMatrix)
+write.csv(PT,"Output.csv")
 
-
-require(monocle)
-fd <- data.frame('gene_short_name' = rownames(cMatrix))
-rownames(fd) <- rownames(cMatrix)
-fd <- new("AnnotatedDataFrame", data = fd)
-cds <- newCellDataSet(as.matrix(cMatrix), featureData = fd, expressionFamily = negbinomial.size())
-cds <- estimateSizeFactors(cds)
-cds <- reduceDimension(cds, reduction_method = "DDRTree", verbose = TRUE, max_components = 2)
-cds <- orderCells(cds)
-pseudoTiveV <- pData(cds)
-
-UMAPPlot(c2)
-c2$pseudotime = log1p(pseudoTiveV$Pseudotime)
+c2$pseudotime = PT
 FeaturePlot(c2, 'pseudotime', order = TRUE)
 
-c2= CellCycleScoring(c2,s.features = cc.genes.updated.2019$s.genes,g2m.features = cc.genes.updated.2019$g2m.genes)
+source('https://raw.githubusercontent.com/dosorio/utilities/master/idConvert/hsa2mmu_SYMBOL.R')
+c2= CellCycleScoring(c2,s.features = hsa2mmu_SYMBOL(cc.genes.updated.2019$s.genes), g2m.features = hsa2mmu_SYMBOL(cc.genes.updated.2019$g2m.genes))
 FeaturePlot(c2, 'Phase', order = TRUE)
 boxplot(c2$pseudotime~c2$Phase)
 plot(log1p(pseudoTiveV$Pseudotime))
